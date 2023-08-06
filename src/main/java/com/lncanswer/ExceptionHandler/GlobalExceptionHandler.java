@@ -19,10 +19,13 @@ public class GlobalExceptionHandler {
             //利用字符串 分隔符split 空白作为分隔符 将信息封装成一个数组
            String [] split =  e.getMessage().split(" ");
            log.info("split= {}",split);
-           String msg  = split[2] + "已存在";
+           String msg  = split[9] + "已存在";
            return Result.error(msg);
         }
+        if (e.getMessage().contains("当前分类")){
+            return  Result.error(e.getMessage());
 
+        }
         return Result.error("服务器错误");
     }
 }

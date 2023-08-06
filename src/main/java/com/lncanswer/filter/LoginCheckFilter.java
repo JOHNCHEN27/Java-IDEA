@@ -2,6 +2,7 @@ package com.lncanswer.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.lncanswer.entitly.Result;
+import com.lncanswer.utils.BaseContext;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,6 +43,9 @@ public class LoginCheckFilter implements Filter {
         //判断登录状态，如果已登录直接放行
         if(req.getSession().getAttribute("employee") != null){
             log.info("员工已经登录：{}",req.getSession().getAttribute("employee"));
+            //获取员工id 存入到ThreadLocal变量中
+           Long empId = (Long) req.getSession().getAttribute("employee");
+            BaseContext.setCurrentId(empId);
             chain.doFilter(request,response);
             return;
         }else {
