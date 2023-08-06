@@ -71,12 +71,12 @@ public class EmployeeController {
         //设置员工的初始密码，创建时间、更新时间、创建人id、修改人id
         //设置密码的时候将密码进行md5加密 保证安全
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        //获取当前用户的id 将存放创建人id、修改人id
-        Long empId = (Long) request.getSession().getAttribute("employee");
-        employee.setCreateUser(empId);
-        employee.setUpdateUser(empId);
+//        employee.setCreateTime(LocalDateTime.now());
+//        employee.setUpdateTime(LocalDateTime.now());
+//        //获取当前用户的id 将存放创建人id、修改人id
+//        Long empId = (Long) request.getSession().getAttribute("employee");
+//        employee.setCreateUser(empId);
+//        employee.setUpdateUser(empId);
 
         employeeService.save(employee);
         return Result.success("新增员工成功");
@@ -106,9 +106,9 @@ public class EmployeeController {
     @PutMapping
     public Result<String> empStatus(HttpServletRequest request,@RequestBody Employee employee){
         log.info("更改员工状态：{}",employee);
-        Long empId = (Long) request.getSession().getAttribute("employee");
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(empId);
+//        Long empId = (Long) request.getSession().getAttribute("employee");
+//        employee.setUpdateTime(LocalDateTime.now());
+//        employee.setUpdateUser(empId);
 
         employeeService.updateById(employee);
         return Result.success("修改员工成功");
