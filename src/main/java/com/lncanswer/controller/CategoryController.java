@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Slf4j
 @RequestMapping("/category")
@@ -68,6 +70,19 @@ public class CategoryController {
         }
         return Result.error("删除失败");
 
+    }
+
+    /*
+    根据type属性查询 回显菜品分类到下拉框
+     */
+    @GetMapping("/list")
+    public Result <List<Category>> selectByType( Category category){
+        log.info("根据type查找：{}",category.getType());
+        LambdaQueryWrapper<Category> lam = new LambdaQueryWrapper<>();
+        lam.eq(category.getType()!=null,Category::getType,category.getType());
+        List<Category> list = categoryService.list(lam);
+
+        return Result.success(list);
     }
 
 }

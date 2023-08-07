@@ -19,3 +19,7 @@ spring:
     username: root
     password: root
     type: com.alibaba.druid.pool.DruidDataSource
+
+#配置文件存储路径
+reggie:
+  path: E:\images\
