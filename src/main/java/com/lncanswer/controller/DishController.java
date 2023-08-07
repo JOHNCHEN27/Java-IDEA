@@ -99,4 +99,18 @@ public class DishController {
         return Result.error("更改失败");
     }
 
+    /*
+    查询dish表中的套餐里包含的菜品
+     */
+    @GetMapping("/list")
+    public Result<List<Dish>> selectList(Long id){
+        log.info("根据id查询菜品：{}",id);
+        LambdaQueryWrapper<Dish> lam = new LambdaQueryWrapper<>();
+        lam.eq(id != null,Dish::getCategoryId,id);
+        lam.eq(Dish::getStatus,1);
+        List<Dish> dishList = dishService.list(lam);
+
+        return Result.success(dishList);
+    }
+
 }
