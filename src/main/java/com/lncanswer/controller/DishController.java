@@ -78,4 +78,39 @@ public class DishController {
         }
         return Result.error("添加失败");
     }
+
+    /*
+    修改菜品 先进行数据回显 再修改菜品
+     */
+    @GetMapping("/{id}")
+    public Result<DishDto> selectDishById(@PathVariable Long id){
+        log.info("根据id查询相应的菜品信息以及菜品口味:{}",id);
+        DishDto dishDto = dishService.selectDishWithFlavor(id);
+        return Result.success(dishDto);
+    }
+
+    @PutMapping
+    public Result<String>  updateDish(@RequestBody DishDto dishDto){
+        log.info("根据传进来的信息：{}",dishDto);
+        if(dishDto != null) {
+            dishService.updateDishAndFlavor(dishDto);
+            return Result.success("更改成功");
+        }
+        return Result.error("更改失败");
+    }
+
+    /*
+    查询dish表中的套餐里包含的菜品
+     */
+    @GetMapping("/list")
+    public Result<List<Dish>> selectList(Long id){
+        log.info("根据id查询菜品：{}",id);
+        LambdaQueryWrapper<Dish> lam = new LambdaQueryWrapper<>();
+        lam.eq(id != null,Dish::getCategoryId,id);
+        lam.eq(Dish::getStatus,1);
+        List<Dish> dishList = dishService.list(lam);
+
+        return Result.success(dishList);
+    }
+
 }

@@ -7,4 +7,8 @@ import com.lncanswer.entitly.Dish;
 public interface DishService extends IService<Dish> {
 
     public void insertDish(DishDto dishDto);
+
+    Dish selectDishWithFlavor(Long id);
+
+    void updateDishAndFlavor(DishDto dishDto);
 }

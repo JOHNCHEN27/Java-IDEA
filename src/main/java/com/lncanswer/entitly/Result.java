@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Result <T>{
     private Integer code; //编码：1成功，0和其它数字为失败
 
