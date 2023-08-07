@@ -23,3 +23,9 @@ spring:
 #配置文件存储路径
 reggie:
   path: E:\images\
+
+---
+##开启循环依赖
+#spring:
+#  main:
+#    allow-circular-references: true

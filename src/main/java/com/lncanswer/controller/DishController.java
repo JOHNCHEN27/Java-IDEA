@@ -78,4 +78,25 @@ public class DishController {
         }
         return Result.error("添加失败");
     }
+
+    /*
+    修改菜品 先进行数据回显 再修改菜品
+     */
+    @GetMapping("/{id}")
+    public Result<DishDto> selectDishById(@PathVariable Long id){
+        log.info("根据id查询相应的菜品信息以及菜品口味:{}",id);
+        DishDto dishDto = dishService.selectDishWithFlavor(id);
+        return Result.success(dishDto);
+    }
+
+    @PutMapping
+    public Result<String>  updateDish(@RequestBody DishDto dishDto){
+        log.info("根据传进来的信息：{}",dishDto);
+        if(dishDto != null) {
+            dishService.updateDishAndFlavor(dishDto);
+            return Result.success("更改成功");
+        }
+        return Result.error("更改失败");
+    }
+
 }

@@ -6,5 +6,5 @@ import com.lncanswer.mapper.DishFlavorMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DishFlavorService extends ServiceImpl<DishFlavorMapper, DishFlavor> implements com.lncanswer.Service.DishFlavorService {
+public class DishFlavorImpleService extends ServiceImpl<DishFlavorMapper, DishFlavor> implements com.lncanswer.Service.DishFlavorService {
 }
