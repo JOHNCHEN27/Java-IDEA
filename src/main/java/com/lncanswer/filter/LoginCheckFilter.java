@@ -28,7 +28,10 @@ public class LoginCheckFilter implements Filter {
                 "/employee/login",
                 "/employee/logout",
                 "/backend/",
-                "/front/"
+                "/front/",
+                "/user/sendMsg",
+                "/user/login",
+                "/common/**"
         };
         //判断请求路径中是否包含urls数组里需要放行的路径
         for (int i = 0; i < urls.length; i++) {
@@ -48,13 +51,21 @@ public class LoginCheckFilter implements Filter {
             BaseContext.setCurrentId(empId);
             chain.doFilter(request,response);
             return;
-        }else {
-            log.info("员工未登录 ！！！");
-            res.getWriter().write(JSON.toJSONString(Result.error("NOTLOGIN")));
+        }
+        //判断移动端用户登录状态
+        if(req.getSession().getAttribute("user" )!= null){
+            log.info("移动段员工已经登录:{}",req.getSession().getAttribute("user"));
+            //获取用户id 存入ThreadLocal变量中
+            Long userId = (Long) req.getSession().getAttribute("user");
+            BaseContext.setCurrentId(userId);
+            chain.doFilter(request,response);
             return;
         }
 
 
+            log.info("员工未登录 ！！！");
+            res.getWriter().write(JSON.toJSONString(Result.error("NOTLOGIN")));
+            return;
 
 
     }
