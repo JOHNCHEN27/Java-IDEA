@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Component
 @Slf4j
 public class MyMetaObjecthandler implements MetaObjectHandler {
+    //不能使用MytaObjectHandler 获取sesiion中的值 通过thread local来获取
     @Override
     public void insertFill(MetaObject metaObject) {
         //插入时填充
