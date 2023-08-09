@@ -3,14 +3,17 @@ package com.lncanswer.Service.imlple;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lncanswer.dto.DishDto;
+import com.lncanswer.entitly.Category;
 import com.lncanswer.entitly.Dish;
 import com.lncanswer.entitly.DishFlavor;
 import com.lncanswer.mapper.DishMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +21,10 @@ import java.util.stream.Collectors;
 public class DishService extends ServiceImpl<DishMapper, Dish> implements com.lncanswer.Service.DishService {
     @Autowired
     private DishFlavorImpleService dishFlavor;
+    @Autowired
+    @Lazy //当两个类存在相应的bean依赖时会引发循环依赖问题，springboot默认不允许
+    //Lazy注解可以延迟加载bean 可以解决单例循环依赖问题
+    private CategoryService categoryService;
 
 
     /*
@@ -88,5 +95,40 @@ public class DishService extends ServiceImpl<DishMapper, Dish> implements com.ln
         //保存集合
         dishFlavor.saveBatch(flavors);
 
+    }
+
+    /*
+    根据菜品id和售卖状态查询菜品
+     */
+    @Override
+    public List<DishDto> selectByCategoryAndStatus(Long categoryId, int status) {
+
+
+        LambdaQueryWrapper<Dish> lam = new LambdaQueryWrapper<>();
+        lam.eq(categoryId!= null,Dish::getCategoryId,categoryId);
+        lam.eq(Dish::getStatus,status);
+        lam.orderByDesc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+
+        List<Dish> dishList = this.list(lam);
+        List<DishDto> dishDtos = dishList.stream().map((item)->{
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item,dishDto);
+
+            Category category = categoryService.getById(item.getCategoryId());
+            if (category!=null){
+                dishDto.setCategoryName(category.getName());
+            }
+            //查询口味数据
+            LambdaQueryWrapper<DishFlavor> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(DishFlavor::getDishId,item.getId());
+
+            List<DishFlavor>  dishFlavors = dishFlavor.list(wrapper);
+            //将查询出来的口味数据封装到dishDto对象中的属性
+            dishDto.setFlavors(dishFlavors);
+            return dishDto;
+
+        }).collect(Collectors.toList());
+
+        return dishDtos;
     }
 }

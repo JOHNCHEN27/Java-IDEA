@@ -75,10 +75,20 @@ public class UserController {
                 user1.setStatus(1);
                 userService.save(user1);
             }
+            log.info("user1Id:{}",user1.getId());
             session.setAttribute("user",user1.getId());
             return Result.success(user1);
         }
 
         return Result.error("短信发送失败");
+    }
+
+    /*
+    用户退出登录
+     */
+    @PostMapping("/loginout")
+    public Result<String> loginout(HttpSession httpSession){
+        httpSession.removeAttribute("user");
+        return Result.success("退出成功");
     }
 }

@@ -22,7 +22,8 @@ public class GlobalExceptionHandler {
            String msg  = split[9] + "已存在";
            return Result.error(msg);
         }
-        if (e.getMessage().contains("当前分类") || e.getMessage().contains("套餐")){
+        if (e.getMessage().contains("当前分类") || e.getMessage().contains("套餐")||
+                e.getMessage().contains("查询错误") ||e.getMessage().contains("列表")){
             return  Result.error(e.getMessage());
 
         }

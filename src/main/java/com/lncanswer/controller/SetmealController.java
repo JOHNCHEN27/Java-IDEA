@@ -6,6 +6,7 @@ import com.lncanswer.Service.imlple.CategoryService;
 import com.lncanswer.Service.imlple.SetmealService;
 import com.lncanswer.dto.SetmealDto;
 import com.lncanswer.entitly.Category;
+import com.lncanswer.entitly.Dish;
 import com.lncanswer.entitly.Result;
 import com.lncanswer.entitly.Setmeal;
 import lombok.extern.slf4j.Slf4j;
@@ -107,6 +108,19 @@ public class SetmealController {
         }
         return Result.error("操作失败");
 
+    }
+
+    /*
+    移动段根据id和状态查询菜品
+     */
+    @GetMapping("/list")
+    public Result<List<Dish>> selectList(Long categoryId,int status){
+        log.info("根据分类id查询和状态查询：{},{}",categoryId,status);
+        List<Dish> list = setmealService.selecByCategoryAndStatus(categoryId,status);
+        if (list!=null){
+            return Result.success(list);
+        }
+        return Result.error("查询失败");
     }
 
 }
