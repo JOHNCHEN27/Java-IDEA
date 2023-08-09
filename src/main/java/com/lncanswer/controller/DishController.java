@@ -102,15 +102,26 @@ public class DishController {
     /*
     查询dish表中的套餐里包含的菜品
      */
-    @GetMapping("/list")
-    public Result<List<Dish>> selectList(Long id){
-        log.info("根据id查询菜品：{}",id);
-        LambdaQueryWrapper<Dish> lam = new LambdaQueryWrapper<>();
-        lam.eq(id != null,Dish::getCategoryId,id);
-        lam.eq(Dish::getStatus,1);
-        List<Dish> dishList = dishService.list(lam);
+//    @GetMapping("/list")
+//    public Result<List<Dish>> selectList(Long categoryId,int status){
+//        log.info("根据id查询菜品：{},{}",categoryId,status);
+//
+//        List<Dish> dishList = dishService.selectByCategoryAndStatus(categoryId,status);
+//        if (dishList != null) {
+//            return Result.success(dishList);
+//        }
+//        return Result.error("查询失败");
+//    }
 
-        return Result.success(dishList);
+    @GetMapping("/list")
+    public Result<List<DishDto>> selectList(Long categoryId,int status){
+        log.info("根据id查询菜品：{},{}",categoryId,status);
+
+        List<DishDto> dishList = dishService.selectByCategoryAndStatus(categoryId,status);
+        if (dishList != null) {
+            return Result.success(dishList);
+        }
+        return Result.error("查询失败");
     }
 
 }

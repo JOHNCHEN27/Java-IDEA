@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lncanswer.ExceptionHandler.CustmoerException;
 import com.lncanswer.dto.SetmealDto;
+import com.lncanswer.entitly.Dish;
 import com.lncanswer.entitly.Setmeal;
 import com.lncanswer.entitly.SetmealDish;
 import com.lncanswer.mapper.SetmealDishMapper;
@@ -23,6 +24,9 @@ public class SetmealService extends ServiceImpl<SetmealMapper, Setmeal> implemen
 
     @Autowired
     SetmealMapper setmealMapper;
+
+    @Autowired
+    DishService dishService;
     /*
     将套餐信息同时加入到套餐表和套餐关联表
      */
@@ -93,5 +97,19 @@ public class SetmealService extends ServiceImpl<SetmealMapper, Setmeal> implemen
              setmealMapper.updateById(item);
              return item;
          }).collect(Collectors.toList());
+    }
+
+    /*
+    移动段根据和categoryId和status查询售卖的菜品
+     */
+    @Override
+    public List<Dish> selecByCategoryAndStatus(Long categoryId, int status) {
+        LambdaQueryWrapper<Dish> lam = new LambdaQueryWrapper<>();
+        lam.eq(Dish::getCategoryId,categoryId);
+        lam.eq(Dish::getStatus,status);
+
+        List<Dish> list = dishService.list(lam);
+
+        return list;
     }
 }
