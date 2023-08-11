@@ -12,9 +12,11 @@ import com.lncanswer.entitly.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 /*
 菜品管理
@@ -29,6 +31,9 @@ public class DishController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /*
     菜品分页查询
@@ -74,6 +79,11 @@ public class DishController {
         log.info("dishDto:{}",dishDto);
         if (dishDto != null) {
             dishService.insertDish(dishDto);
+
+            //清理某个菜品下Redis缓存数据
+            String key = "dish_" + dishDto.getCategoryId() + "_1";
+            redisTemplate.delete(key);
+
             return Result.success("添加成功");
         }
         return Result.error("添加失败");
@@ -94,6 +104,14 @@ public class DishController {
         log.info("根据传进来的信息：{}",dishDto);
         if(dishDto != null) {
             dishService.updateDishAndFlavor(dishDto);
+
+            //修改之后清理Redis中查询菜品所有的缓存数据
+           // Set keys = redisTemplate.keys("dish_*");
+            //redisTemplate.delete(keys);
+
+            //清理某个分类下的c菜品缓存数据
+            String key ="dish_" +dishDto.getCategoryId()+"_" +dishDto.getStatus();
+            redisTemplate.delete(key);
             return Result.success("更改成功");
         }
         return Result.error("更改失败");
