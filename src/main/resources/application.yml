@@ -12,6 +12,7 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: ASSIGN_ID
+#配置了shardingJDBC的数据源 需要把druid数据源取消掉
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -47,3 +48,10 @@ spring:
           max-wait: 1ms #连接池最大阻塞等待时间
           max-idle: 4  #连接池中最大k空闲连接
           min-idle: 0  #连接池中最小空闲连接
+ #配置缓存有效期，不配置默认永久有效
+  cache:
+    redis:
+      time-to-live: 1800000  #单位毫秒  这里设置了缓存过期时间为30分钟
+
+---
+#配置shardingJDBC主从复制数据源 读写规则 配置完成 对数据库的写操作自动对主要的数据库进行，读操作在从数据库中

@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -72,6 +74,7 @@ public class SetmealController {
     新增菜单
      */
     @PostMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public Result<String> saveSetmeal(@RequestBody SetmealDto setmealDto){
         log.info("插入新的套餐：{}",setmealDto);
         if (setmealDto != null) {
@@ -84,8 +87,10 @@ public class SetmealController {
 
     /*
     根据ids删除 批量删除
+    CacheEvict 在数据修改之后将相关缓存中的数据全部删除  allEntries = true 删除全部
      */
     @DeleteMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public Result<String> deleteByIds(Long [] ids){
         log.info("根据ids数组删除：{}",ids);
         if(ids != null){
@@ -112,8 +117,12 @@ public class SetmealController {
 
     /*
     移动段根据id和状态查询菜品
+     Cacheable注解：如果当前数据存在于缓存中，直接返回缓存数据，如果不存在则查询数据库中数据再将其
+     存入缓存中，  value是缓存的名字， key 是缓存的键
+     注意返回的对象需要在它的类上实现序列化接口
      */
     @GetMapping("/list")
+    @Cacheable(value = "setmealCache",key = "#root.args[0]+'_' + #root.args[1]")
     public Result<List<Dish>> selectList(Long categoryId,int status){
         log.info("根据分类id查询和状态查询：{},{}",categoryId,status);
         List<Dish> list = setmealService.selecByCategoryAndStatus(categoryId,status);
