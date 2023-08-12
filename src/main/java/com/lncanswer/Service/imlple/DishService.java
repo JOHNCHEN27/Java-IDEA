@@ -6,15 +6,18 @@ import com.lncanswer.dto.DishDto;
 import com.lncanswer.entitly.Category;
 import com.lncanswer.entitly.Dish;
 import com.lncanswer.entitly.DishFlavor;
+import com.lncanswer.entitly.Result;
 import com.lncanswer.mapper.DishMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +29,8 @@ public class DishService extends ServiceImpl<DishMapper, Dish> implements com.ln
     //Lazy注解可以延迟加载bean 可以解决单例循环依赖问题
     private CategoryService categoryService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /*
     同时保存菜品和菜品口味
@@ -103,14 +108,25 @@ public class DishService extends ServiceImpl<DishMapper, Dish> implements com.ln
     @Override
     public List<DishDto> selectByCategoryAndStatus(Long categoryId, int status) {
 
+        List<DishDto> dishDtos = null;
+        //动态构造key值
+        String key ="dish_" +categoryId+"_"+status;
 
+        //先从redis中获取缓存数据
+        dishDtos = (List<DishDto>) redisTemplate.opsForValue().get(key);
+
+        if(dishDtos != null){
+            //如果redis中存在数据,直接返回,无需查询数据库
+            return dishDtos;
+        }
+        //如果不存在 则需要查询数据库，
         LambdaQueryWrapper<Dish> lam = new LambdaQueryWrapper<>();
         lam.eq(categoryId!= null,Dish::getCategoryId,categoryId);
         lam.eq(Dish::getStatus,status);
         lam.orderByDesc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
 
         List<Dish> dishList = this.list(lam);
-        List<DishDto> dishDtos = dishList.stream().map((item)->{
+         dishDtos = dishList.stream().map((item)->{
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item,dishDto);
 
@@ -128,6 +144,9 @@ public class DishService extends ServiceImpl<DishMapper, Dish> implements com.ln
             return dishDto;
 
         }).collect(Collectors.toList());
+
+        //将查询到的菜品数据缓存到Redis中 设置缓存时间六十分钟
+        redisTemplate.opsForValue().set(key,dishDtos,60, TimeUnit.MINUTES);
 
         return dishDtos;
     }
