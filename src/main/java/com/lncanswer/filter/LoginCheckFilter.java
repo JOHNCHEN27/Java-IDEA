@@ -31,7 +31,11 @@ public class LoginCheckFilter implements Filter {
                 "/front/",
                 "/user/sendMsg",
                 "/user/login",
-                "/common/**"
+                "/common/**",
+                "/doc.html",
+                "webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
         };
         //判断请求路径中是否包含urls数组里需要放行的路径
         for (int i = 0; i < urls.length; i++) {
