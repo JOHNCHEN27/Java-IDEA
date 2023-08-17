@@ -11,12 +11,14 @@ import com.lncanswer.utils.ValidateCodeUtils;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -24,6 +26,10 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    //注入redis模板对象
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /*
     发送手机短信
@@ -43,7 +49,10 @@ public class UserController {
            // SMSUtils.sendMessage("lncanswer","SMS_284090456","phone","code");
 
             //将生成的验证码保存到session中
-            httpSession.setAttribute(phone,code);
+           // httpSession.setAttribute(phone,code);
+
+            //将生成的验证码保存到Redis中，并且设置验证码为2分钟
+            redisTemplate.opsForValue().set(phone,code,2, TimeUnit.MINUTES);
             return Result.success("手机验证码短信送成功");
         }
         return Result.error("手机验证码短信发送失败");
@@ -59,11 +68,17 @@ public class UserController {
         String phone  = user.get("phone").toString();
         String code = user.get("code").toString();
         //从session中获取保存的验证码
-        Object codeInSession = session.getAttribute(phone);
+        //Object codeInSession = session.getAttribute(phone);
+
+        //从Redis中获取缓存的验证码
+        Object codeInSession =  redisTemplate.opsForValue().get(phone);
 
         //进行验证码的对比
         if(codeInSession != null && codeInSession.equals(code)){
             //能够对比成功，则登录成功
+            //如果用户登录成功，删除Redis中缓存的验证码
+            redisTemplate.delete(phone);
+
             //判断当前用户是否为新用户，如果是新用户则自动完成注册
             LambdaQueryWrapper<User> lam =new LambdaQueryWrapper<>();
             lam.eq(User::getPhone,phone);
@@ -77,6 +92,7 @@ public class UserController {
             }
             log.info("user1Id:{}",user1.getId());
             session.setAttribute("user",user1.getId());
+
             return Result.success(user1);
         }
 
